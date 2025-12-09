@@ -1,0 +1,11 @@
+git checkout -b user-panel
+git push origin user-panel
+
+git checkout -b doctor-panel
+git push origin doctor-panel
+
+git checkout -b admin-panel
+git push origin admin-panel
+
+git checkout -b backend
+git push origin backend
