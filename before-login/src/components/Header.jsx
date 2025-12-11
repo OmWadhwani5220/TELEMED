@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 import './Header.css';
 
 const Header = () => {
@@ -21,18 +23,18 @@ const Header = () => {
         </button>
 
         <nav className={`header-nav ${isMenuOpen ? 'active' : ''}`}>
-          <a href="/" className="nav-link">
+          <Link to ="/" className="nav-link">
             Home
-          </a>
-          <a href="/about" className="nav-link">
+          </Link>
+          <Link to ="/aboutus" className="nav-link">
             About Us
-          </a>
-          <a href="/contact" className="nav-link">
+          </Link>
+          <Link to ="/contactus" className="nav-link">
             Contact Us
-          </a>
-          <a href="/faq" className="nav-link">
+          </Link>
+          <Link to ="/faq" className="nav-link">
             FAQ
-          </a>
+          </Link>
         </nav>
 
         <div className="header-auth">
