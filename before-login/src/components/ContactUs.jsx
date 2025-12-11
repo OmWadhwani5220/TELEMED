@@ -1,6 +1,40 @@
 import React from "react";
 import "./ContactUs.css";
 
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    name: form.name.value,
+    email: form.email.value,
+    phone: form.phone.value,
+    subject: form.subject.value,
+    message: form.message.value,
+    agree: form.querySelector('input[type="checkbox"]').checked
+  };
+
+  try {
+    const res = await fetch('http://localhost:5000/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!res.ok) {
+      const body = await res.json();
+      console.error('Backend error', body);
+      alert('Submission failed: ' + (body.error || 'validation error'));
+      return;
+    }
+    alert('Message sent — thanks!');
+    form.reset();
+  } catch (err) {
+    console.error('Network error', err);
+    alert('Network error — please try again');
+  }
+};
+
+
 const ContactUs = () => {
   return (
     <div className="tm-contact-page">
@@ -88,7 +122,7 @@ const ContactUs = () => {
             to you as soon as possible.
           </p>
 
-          <form className="tm-contact-form">
+          <form className="tm-contact-form" onSubmit={handleSubmit} >
             <div className="tm-form-grid">
               <div className="tm-form-field">
                 <label htmlFor="name">Full Name</label>

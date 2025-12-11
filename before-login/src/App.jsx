@@ -2,8 +2,8 @@
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import AboutUs from "../../TELEMED/before-login/src/components/AboutUs";
-import ContactUs from "../../TELEMED/before-login/src/components/ContactUs";
+import AboutUs from "./components/AboutUs";
+import ContactUs from "./components/ContactUs";
 import "./App.css";
 
 // Simple Home component (you can move to its own file if you prefer)
