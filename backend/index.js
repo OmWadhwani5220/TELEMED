@@ -1,57 +1,88 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const { body, validationResult } = require('express-validator');
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { body, validationResult } from "express-validator";
 
-const Contact = require('./models/Contact');
+import authRoutes from "./routes/authRoutes.js";
+import Contact from "./models/Contact.js";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Telemed DB
+const MONGO_URL =
+  process.env.MONGO_URL || "mongodb://localhost:27017/telemed";
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads")); // serve uploaded PDFs/images
 
-app.get('/health', (req, res) => {
+// Health Check
+app.get("/health", (req, res) => {
   res.json({ ok: true, dbState: mongoose.connection.readyState });
 });
 
+/* =============================================================
+   CONTACT FORM API  (UNCHANGED, WORKS EXACTLY AS YOUR VERSION)
+============================================================= */
 app.post(
-  '/api/contact',
+  "/api/contact",
   [
-    body('name').notEmpty().withMessage('Name required'),
-    body('email').isEmail().withMessage('Valid email required'),
-    body('message').notEmpty().withMessage('Message required')
+    body("name").notEmpty().withMessage("Name required"),
+    body("email").isEmail().withMessage("Valid email required"),
+    body("message").notEmpty().withMessage("Message required"),
   ],
+
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
 
     try {
       const { name, email, phone, subject, message, agree } = req.body;
-      const c = new Contact({ name, email, phone, subject, message, agree: !!agree });
+
+      const c = new Contact({
+        name,
+        email,
+        phone,
+        subject,
+        message,
+        agree: !!agree,
+      });
+
       const saved = await c.save();
-      return res.status(201).json({ message: 'Contact saved', id: saved._id });
+
+      return res
+        .status(201)
+        .json({ message: "Contact saved", id: saved._id });
     } catch (err) {
-      console.error('Save error:', err);
-      return res.status(500).json({ error: 'Server error' });
+      console.error("Save error:", err);
+      res.status(500).json({ error: "Server error" });
     }
   }
 );
 
-// Connect to MongoDB and start server AFTER successful connection
-(async function start() {
-  try {
-    const uri = process.env.MONGO_URI;
-    if (!uri) throw new Error('MONGO_URI not set in .env');
+/* =============================================================
+   AUTH ROUTES (SIGNUP + LOGIN + USER VIEW)
+============================================================= */
+app.use("/api/auth", authRoutes);
 
-    // NOTE: no deprecated options here
-    await mongoose.connect(uri);
-
-    console.log('MongoDB connected');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  } catch (err) {
-    console.error('DB Error:', err);
+/* =============================================================
+  CONNECT TO DATABASE & START SERVER
+============================================================= */
+mongoose
+  .connect(MONGO_URL)
+  .then(() => {
+    console.log("MongoDB Connected to Telemed");
+    app.listen(PORT, () =>
+      console.log(`Server running on http://localhost:${PORT}`)
+    );
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
     process.exit(1);
-  }
-})();
+  });
